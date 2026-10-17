@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Executive Dashboard (GitHub Sync)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#0a0f1d] text-gray-200 min-h-screen font-sans">
+    <script>
+        if (localStorage.getItem('adminLoggedIn') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <!-- Top Navigation -->
+    <header class="bg-[#111827] border-b border-gray-800 px-6 py-4 flex justify-between items-center shadow-lg">
+        <div class="flex items-center space-x-3">
+            <span class="text-xl font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-gear text-cyan-400"></i> Executive Dashboard (GitHub Sync)
+            </span>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="../index.html" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition">
+                <i class="fa-solid fa-house"></i> 🏠 Go to Homepage
+            </a>
+            <button onclick="localStorage.removeItem('adminLoggedIn'); window.location.href='login.html';" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
+                Logout
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-[1400px] mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Form Container -->
+        <section class="lg:col-span-5 bg-[#1f293d] p-6 rounded-2xl border border-gray-800 shadow-xl self-start">
+            <div class="flex items-center gap-3 mb-6">
+                <i class="fa-solid fa-cloud-arrow-up text-cyan-400 text-xl"></i>
+                <h2 class="text-xl font-bold text-white" id="form-title">কনটেন্ট আপলোড ফর্ম</h2>
+            </div>
+            
+            <form id="content-form" onsubmit="handleSubmit(event)" class="space-y-4">
+                <input type="hidden" id="edit-id">
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">বিষয় নির্বাচন</label>
+                    <select id="subject" class="w-full bg-[#0a0f1d] border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500" required>
+                        <option value="HSC ICT">HSC ICT</option>
+                        <option value="English 1st Paper">English 1st Paper</option>
+                        <option value="English 2nd Paper">English 2nd Paper</option>
+                        <option value="GK (General Knowledge)">GK (General Knowledge)</option>
+                        <option value="Mathematics">Mathematics</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">টাইপ</label>
+                    <select id="type" class="w-full bg-[#0a0f1d] border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500" required>
+                        <option value="Video">Video</option>
+                        <option value="PDF Document">PDF Document</option>
+                        <option value="Image Resource">Image Resource</option>
+                        <option value="Exam System">Exam System</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">শিরোনাম</label>
+                    <input type="text" id="title" class="w-full bg-[#0a0f1d] border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500" placeholder="কনটেন্টের শিরোনাম লিখুন" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">YouTube বা রিসোর্স লিংক</label>
+                    <input type="url" id="link" class="w-full bg-[#0a0f1d] border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500" placeholder="https://..." required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">থাম্বনেইল ইমেজ ইউআরএল (ঐচ্ছিক)</label>
+                    <input type="text" id="thumbnail" class="w-full bg-[#0a0f1d] border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500" placeholder="https://images.unsplash.com/... (বা ফাঁকা রাখুন)">
+                </div>
+
+                <button type="submit" id="submit-btn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition duration-200 uppercase tracking-wider text-sm mt-2">
+                    SYNC TO LOCAL DATA
+                </button>
+            </form>
+        </section>
+
+        <!-- List Table Container -->
+        <section class="lg:col-span-7 bg-[#1f293d] p-6 rounded-2xl border border-gray-800 shadow-xl">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-list-check text-cyan-400 text-xl"></i>
+                    <h2 class="text-xl font-bold text-white">কনটেন্ট তালিকা (Realtime Local)</h2>
+                </div>
+                <button onclick="exportData()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+                    <i class="fa-solid fa-download"></i> গিটহাবে পুশ করার কোড কপি করুন
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-gray-800 text-gray-400 text-sm">
+                            <th class="pb-3 font-semibold">বিষয়</th>
+                            <th class="pb-3 font-semibold">টাইপ</th>
+                            <th class="pb-3 font-semibold">শিরোনাম</th>
+                            <th class="pb-3 font-semibold text-right">অ্যাকশন</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dashboard-list" class="divide-y divide-gray-800 text-sm">
+                        <!-- Items dynamically injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for GitHub update instructions -->
+    <div id="github-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-[#1f293d] border border-gray-700 rounded-2xl p-6 max-w-2xl w-full shadow-2xl animate-fade-in">
+            <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                <i class="fa-brands fa-github text-2xl"></i> গিটহাবে ডেটা আপডেট করার নিয়ম
+            </h3>
+            <p class="text-gray-300 text-sm mb-4 leading-relaxed">
+                যেহেতু এটি সম্পূর্ণ একটি **ফ্রি ও সার্ভারলেস ওয়েবসাইট**, তাই নতুন কনটেন্ট সেভ, এডিট বা ডিলিট করার পর নিচের কোডটি কপি করে আপনার GitHub প্রজেক্টের <code class="bg-[#0a0f1d] px-1.5 py-0.5 rounded text-cyan-400">data.js</code> ফাইলে পেস্ট করে কমিট করলেই সবার জন্য ওয়েবসাইটটি অটোমেটিক আপডেট হয়ে যাবে!
+            </p>
+            <textarea id="json-codeblock" class="w-full h-48 bg-[#0a0f1d] border border-gray-700 rounded-xl p-3 font-mono text-xs text-green-400 focus:outline-none mb-4" readonly></textarea>
+            <div class="flex justify-end gap-3">
+                <button onclick="copyAndClose()" class="bg-cyan-500 hover:bg-cyan-600 text-[#0a0f1d] font-bold px-5 py-2 rounded-xl text-sm transition">
+                    কোড কপি করুন এবং বন্ধ করুন
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Logic script -->
+    <script src="../data.js"></script>
+    <script>
+        function renderTable() {
+            const tbody = document.getElementById('dashboard-list');
+            tbody.innerHTML = '';
+            
+            siteData.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-gray-800 hover:bg-[#25324b] transition';
+                tr.innerHTML = `
+                    <td class="py-3.5 font-medium text-white">${item.subject}</td>
+                    <td class="py-3.5"><span class="px-2 py-0.5 rounded text-xs bg-gray-800 text-cyan-400 border border-cyan-900">${item.type}</span></td>
+                    <td class="py-3.5 max-w-[200px] truncate text-gray-300">${item.title}</td>
+                    <td class="py-3.5 text-right space-x-2">
+                        <button onclick="editItem(${item.id})" class="text-yellow-500 hover:text-yellow-400 transition text-base"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteItem(${item.id})" class="text-red-500 hover:text-red-400 transition text-base"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const itemData = {
+                id: id ? parseInt(id) : Date.now(),
+                subject: document.getElementById('subject').value,
+                type: document.getElementById('type').value,
+                title: document.getElementById('title').value,
+                link: document.getElementById('link').value,
+                thumbnail: document.getElementById('thumbnail').value || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500'
+            };
+
+            if (id) {
+                const idx = siteData.findIndex(item => item.id === parseInt(id));
+                if (idx !== -1) siteData[idx] = itemData;
+            } else {
+                siteData.push(itemData);
+            }
+
+            resetForm();
+            renderTable();
+            exportData();
+        }
+
+        function editItem(id) {
+            const item = siteData.find(i => i.id === id);
+            if (!item) return;
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('subject').value = item.subject;
+            document.getElementById('type').value = item.type;
+            document.getElementById('title').value = item.title;
+            document.getElementById('link').value = item.link;
+            document.getElementById('thumbnail').value = item.thumbnail === 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500' ? '' : item.thumbnail;
+            
+            document.getElementById('form-title').innerText = 'কনটেন্ট এডিট ফর্ম';
+            document.getElementById('submit-btn').innerText = 'UPDATE DATA';
+        }
+
+        function deleteItem(id) {
+            if(confirm('আপনি কি নিশ্চিতভাবে এই কনটেন্টটি মুছে ফেলতে চান?')) {
+                siteData = siteData.filter(i => i.id !== id);
+                renderTable();
+                exportData();
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('content-form').reset();
+            document.getElementById('edit-id').value = '';
+            document.getElementById('form-title').innerText = 'কনটেন্ট আপলোড ফর্ম';
+            document.getElementById('submit-btn').innerText = 'SYNC TO LOCAL DATA';
+        }
+
+        function exportData() {
+            const codeStr = `// Dynamic Data Storage Matrix for Learn with Abdullah Sir\nlet siteData = ${JSON.stringify(siteData, null, 4)};`;
+            document.getElementById('json-codeblock').value = codeStr;
+            document.getElementById('github-modal').classList.remove('hidden');
+        }
+
+        function copyAndClose() {
+            const textarea = document.getElementById('json-codeblock');
+            textarea.select();
+            document.execCommand('copy');
+            alert('কোডটি সফলভাবে কপি হয়েছে! এবার এটি আপনার GitHub-এর data.js ফাইলে পেস্ট করে সাবমিট বা কমিট করুন।');
+            document.getElementById('github-modal').classList.add('hidden');
+        }
+
+        // Initial load
+        window.onload = renderTable;
+    </script>
+</body>
+</html>

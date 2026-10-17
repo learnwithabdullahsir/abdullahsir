@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Learn with Abdullah Sir</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0b132b] text-white flex items-center justify-center min-h-screen">
+    <div class="bg-[#1c2541] p-8 rounded-xl shadow-2xl w-full max-w-md border border-[#3a506b]">
+        <h2 class="text-2xl font-bold text-center mb-6 text-[#5bc0be]">অ্যাডমিন লগইন</h2>
+        <div id="error-msg" class="text-red-500 text-sm mb-4 text-center hidden">ভুল ইউজারনেম বা পাসওয়ার্ড!</div>
+        <form id="login-form" onsubmit="handleLogin(event)">
+            <div class="mb-4">
+                <label class="block text-sm font-semibold mb-2">ইউজারনেম</label>
+                <input type="text" id="username" class="w-full px-4 py-2 rounded bg-[#0b132b] border border-[#3a506b] focus:outline-none focus:border-[#5bc0be]" required>
+            </div>
+            <div class="mb-6">
+                <label class="block text-sm font-semibold mb-2">পাসওয়ার্ড</label>
+                <input type="password" id="password" class="w-full px-4 py-2 rounded bg-[#0b132b] border border-[#3a506b] focus:outline-none focus:border-[#5bc0be]" required>
+            </div>
+            <button type="submit" class="w-full bg-[#5bc0be] hover:bg-[#48a9a6] text-[#0b132b] font-bold py-2 rounded transition duration-200">লগইন করুন</button>
+        </form>
+    </div>
+    <script>
+        function handleLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            if (user === 'admin' && pass === 'admin123') {
+                localStorage.setItem('adminLoggedIn', 'true');
+                window.location.href = 'dashboard.html';
+            } else {
+                document.getElementById('error-msg').classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
